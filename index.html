@@ -19,10 +19,10 @@
       referrerpolicy="no-referrer"
     />
   </head>
-  <body>
+  <body onload="getLocation()">
     <div class="container">
       <h1>Weather App</h1>
-      <form>
+      <form onsubmit="formSubmit(event)">
         <input
           data-city
           type="text"

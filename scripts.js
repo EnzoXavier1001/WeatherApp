@@ -1,29 +1,56 @@
-function start() {
-  const cityInput = document.querySelector('[data-city]').value
-  const url = `https://api.openweathermap.org/data/2.5/weather?q=${cityInput}&appid=0bd258d5806127b89d0fc52485b79de5&units=metric`
+const cityInput = document.querySelector('[data-city]')
 
-  if (cityInput != '') {
-    pegarApi(url)
+function start() {
+  const cityInputValue = cityInput.value
+  const url = `https://api.openweathermap.org/data/2.5/weather?q=${cityInputValue}&appid=0bd258d5806127b89d0fc52485b79de5&units=metric`
+
+  if (cityInputValue != '') {
+    fetchingApi(url)
   } else {
     alert('Preencha os campos!')
     return
   }
 }
 
-function pegarApi(url) {
-  fetch(url)
-    .then(res => res.json())
-    .then(json => preencherDados(json))
+function getLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(showPosition)
+  }
 }
 
-// document.addEventListener('keypress', e => {
-//   e.preventDefault()
-//   if (e.code === 'Enter') {
-//     start()
-//   }
-// })
+function showPosition(position) {
+  let lat = position.coords.latitude
+  let lon = position.coords.longitude
 
-function preencherDados(dados) {
+  console.log(lat, lon)
+
+  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=0bd258d5806127b89d0fc52485b79de5`
+
+  fetchingApi(url)
+}
+
+async function fetchingApi(url) {
+  try {
+    let res = await fetch(url)
+    let data = await res.json()
+
+    dataFill(data)
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+function formSubmit(event) {
+  event.preventDefault(event)
+}
+
+cityInput.addEventListener('keypress', e => {
+  if (e.code === 'Enter') {
+    start()
+  }
+})
+
+function dataFill(data) {
   const divWeatherData = (document.querySelector(
     '.weather-data'
   ).style.display = 'block')
@@ -31,14 +58,11 @@ function preencherDados(dados) {
   const weather = document.querySelector('[data-weather]')
   const humidity = document.querySelector('[data-humidity]')
   const feelsLike = document.querySelector('[data-feels-like]')
-  const imgCloud = document.querySelector('[data-image]')
   const locationIcon = document.querySelector('.icons')
 
-  console.log(dados)
-  locationIcon.innerHTML = `<img src="icons/${dados.weather[0].icon}.png"></img>`
-
-  weather.textContent = dados.main.temp + '°C'
-  city.innerHTML = `<i class="fas fa-location-arrow"></i> ${dados.name}, ${dados.sys.country} `
-  humidity.innerHTML = `<i class="fas fa-tint"></i> ${dados.main.humidity}% Humidity`
-  feelsLike.innerHTML = `<i class="fas fa-temperature-high"></i> ${dados.main.feels_like}°C Feels Like `
+  locationIcon.innerHTML = `<img src="icons/${data.weather[0].icon}.png"></img>`
+  weather.textContent = data.main.temp + '°C'
+  city.innerHTML = `<i class="fas fa-location-arrow"></i> ${data.name}, ${data.sys.country} `
+  humidity.innerHTML = `<i class="fas fa-tint"></i> ${data.main.humidity}% Humidity`
+  feelsLike.innerHTML = `<i class="fas fa-temperature-high"></i> ${data.main.feels_like}°C Feels Like `
 }
